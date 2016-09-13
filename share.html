@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+
+<title>Share on GNU social</title>
+
+<style>
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin: 0;
+  }
+
+  .banner {
+    background: linear-gradient(to bottom, #a22430 0%, #c33541 100%);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    color: #fff;
+    font-size: 100%;
+    font-weight: normal;
+    margin: 0 0 7px;
+    padding: 7px 15px;
+  }
+
+  .instance-lbl {
+    font-size: 200%;
+  }
+
+  .instance-txt {
+    border: 1ps solid #ddd;
+    border-radius: 5px;
+    display: block;
+    margin-bottom: 12px;
+    padding: 5px;
+    width: 35em;
+  }
+
+  .share {
+    margin: 0 15px;
+  }
+
+  .submit {
+    background: linear-gradient(to bottom, #a22430 0%, #c33541 100%);
+    border: 1px solid #c33541;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    display: block;
+    font-weight: bold;
+    margin-top: 12px;
+    padding: 5px 10px;
+  }
+
+  .submit:hover {
+    background: linear-gradient(to bottom, #c33541 0%, #d44652 100%);
+  }
+</style>
+</head>
+<body>
+  <h1 class="banner">Share on GNU social</h1>
+
+  <form class="share">
+    <label class="instance-lbl" for="instance">Enter your GNU social instance URL:</label>
+    <input class="instance-txt" id="instance" placeholder="quitter.se" required />
+  
+    <label class="remember-settings">
+      <input id="remember-settings" type="checkbox">
+      Remember settings
+    </label>
+
+    <input class="submit" type="submit" value="Share" />
+  </form>
+  
+  <script>
+    (function() {
+        "use strict";
+
+        var shareForm = document.querySelector( ".share" ),
+            instanceInput = document.getElementById( "instance" ),
+            rememberMe = document.getElementById( "remember-settings" ),
+            cachedInstance = getCookie( "instance" );
+
+        // FIXME: Once the instance is remembered, there is no way to
+        //        forget it except by manually clearing cookies...
+        if ( cachedInstance !== undefined ) {
+            redirect(cachedInstance, getShareTarget());
+
+            return;
+        }
+            
+        shareForm.addEventListener( "submit", function( e ) {
+            e.preventDefault();
+
+            // Get the provided URL, remove trailing slash if there is one
+            var instance = instanceInput.value.replace( /\/$/, "" );
+
+            // Prepend "http://" if the URL provided doesn't start with http(s)://
+            // we could use type=url on the input to get Firefox to do validation for us
+            // but it's so much nicer not having to type it...
+            if ( !/^https?:\/\//.test( instance ) ) {
+                instance = "http://" + instance;
+            }
+
+            // Remember the instance URL for 30 days
+            if ( rememberMe.checked ) {
+                setCookie( "instance", instance, 30 );
+            }
+
+            redirect(instance, getShareTarget());
+        } );
+
+        /**
+         * Redirect to the instance's "New Notice" page
+         *
+         * @param instance String The base url of the GNU social instance
+         * @param shareTarget Object The title and url of the page to share
+         */
+        function redirect( instance, shareTarget ) {
+            window.location = instance + "/notice/new?status_textarea=" + shareTarget.title + "%20-%20" + shareTarget.url;
+        }
+
+        /**
+         * Extract the title and url of the page to share from window.location.search
+         *
+         * @return Object {title: "The title", url: "http://example.org"}
+         */
+        function getShareTarget() {
+            var query = window.location.search.replace( /^\?/, "" ),
+              params = query.split( "&" ),
+              len = params.length,
+              i,
+              key,
+              value,
+              kv,
+              data = {};
+            
+            for( i = 0; i < len; i += 1 ) {
+                kv = params[ i ].split( "=" );
+                key = kv[ 0 ];
+                value = kv[ 1 ];
+
+                switch ( key ) {
+                    case "u":
+                        data.url = value;
+                        break;
+                        
+                    case "t":
+                        data.title = value;
+                        break;
+                }
+            }
+
+            return data;
+        }
+
+        /**
+         * Get the cookie value for a given cookie name
+         *
+         * @param name String The name of the cookie
+         * @return String The value of the cookie or undefined if it doesn't exist
+         */
+        function getCookie( name ) {
+            var cookies = document.cookie.split( ";" ),
+                len = cookies.length,
+                i,
+                value,
+                cpair;
+
+            for ( i = 0; i < len; i += 1 ) {
+                cpair = cookies[ i ].split( "=" );
+
+                if ( cpair[ 0 ] === name ) {
+                    value = cpair[ 1 ];
+                    break;
+                }
+            }
+
+            return value;
+        }
+
+        /**
+         * Set a cookie's value and expiry date
+         *
+         * @param name String The cookie name
+         * @param value String The value the cookie will hold
+         * @param end Number The number of days until it expires
+         */
+        function setCookie( name, value, end ) {
+            var expires = "",
+                date;
+
+            if ( end !== undefined ) {
+                switch ( end.constructor ) {
+                    case Number:
+                        date = new Date();
+                        date.setTime( date.getTime() + ( end * 24 * 60 * 60 * 1000 ) );
+                        break;
+                    case String:
+                        date = new Date( end );
+                        break;
+                }
+
+                if ( date instanceof Date ) {
+                    date.setHours( 0 );
+                    date.setMinutes( 0 );
+                    date.setSeconds( 0 );
+                    expires = "expires=" + date.toUTCString();
+                }
+            }
+
+            document.cookie = name + "=" + value + ";" + expires + "; path=/";
+        }
+    }());
+  </script>
+</body>
+</html>

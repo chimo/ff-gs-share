@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>GNU social Share Provider</title>
+  
+  <style>
+    .activate {
+      background: #0095dd;
+      border: 2px solid #0092cc;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      padding: 10px 30px;
+    }
+    
+    .activate:hover {
+      background: #33aae4;
+    }
+    
+    .content,
+    .screenshot {
+      float: left;
+      width: 50%;
+    }
+    
+    .screenshot {
+      text-align: center;
+    }
+
+    .splash {
+      border: 1px solid #ddd;
+      margin: 0 30px;
+      overflow: hidden;
+      padding: 30px;
+    }
+    
+    .title {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="splash">
+    <div class="content">
+      <h1 class="title">Share on GNU social</h1>
+    
+      <p>This widget lets you share your favorite links on GNU social.</p>
+    
+      <button class="activate" onclick="activate(this)">Activate GNU social share provider</button>
+    </div>
+    
+    <div class="screenshot">
+      <img src="images/screenshot.png" />
+    </div>
+  </div>
+
+  
+
+  <script>
+    var loc = location.href,
+        baseurl = loc.substring( 0, loc.lastIndexOf( "/" ) );
+
+    var data = {
+      // currently required
+      "name": "Share on GNU social",
+      "iconURL": baseurl + "/images/icon16.png",
+      "icon32URL": baseurl + "/images/icon32.png",
+      "icon64URL": baseurl + "/images/icon64.png",
+
+      // the URL of the contents for the share panel
+      "shareURL": baseurl + "/share.html?u=%{url}&t=%{title}",
+
+      // ???
+      // icons should be 32x32 pixels
+      // "markedIcon": baseurl + "/unchecked.jpg",
+      // "unmarkedIcon": baseurl + "/checked.jpg",
+
+      // should be available for display purposes
+      "description": "Share web pages on GNU social",
+      "author": "chimo",
+      "homepageURL": "https://code.chromic.org/chimo/ff-gs-share",
+
+      // optional
+      "version": "1.0"
+    }
+
+    function activate(node) {
+      var event = new CustomEvent("ActivateSocialFeature");
+      node.setAttribute("data-service", JSON.stringify(data));
+      node.dispatchEvent(event);
+    }
+  </script>
+</body>
+</html>
