@@ -139,12 +139,16 @@
                 value = kv[ 1 ];
 
                 switch ( key ) {
-                    case "u":
+                    case "title":
+                        data.title = value;
+                        break;
+
+                    case "url":
                         data.url = value;
                         break;
-                        
-                    case "t":
-                        data.title = value;
+
+                    case "text":
+                        data.text = value;
                         break;
                 }
             }
