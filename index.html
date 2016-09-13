@@ -52,12 +52,17 @@
   <div class="splash">
     <div class="content">
       <h1 class="title">Share on GNU social</h1>
-    
+
       <p>This widget lets you share your favorite links on GNU social.</p>
-    
-      <button class="activate" onclick="activate(this)">Activate GNU social share provider</button>
+
+      <form class="share">
+        <label class="instance-lbl" for="instance">Enter your GNU social instance URL:</label>
+        <input class="instance-txt" id="instance" placeholder="quitter.se" required />
+
+        <input id="activate" class="activate" type="submit" value="Activate GNU social share provider" />
+      </form>
     </div>
-    
+
     <div class="screenshot">
       <img class="screenshot__image" src="images/screenshot.png" />
     </div>
@@ -68,38 +73,49 @@
   </div>
 
   <script>
-    var loc = location.href,
-        baseurl = loc.substring( 0, loc.lastIndexOf( "/" ) );
+    ( function() {
+        var shareForm = document.querySelector( ".share" ),
+            instanceInput = document.getElementById( "instance" );
 
-    var data = {
-      // currently required
-      "name": "Share on GNU social",
-      "iconURL": baseurl + "/images/icon16.png",
-      "icon32URL": baseurl + "/images/icon32.png",
-      "icon64URL": baseurl + "/images/icon64.png",
+        shareForm.addEventListener( "submit", function( e ) {
+            e.preventDefault();
 
-      // the URL of the contents for the share panel
-      "shareURL": baseurl + "/share.html?u=%{url}&t=%{title}",
+            // Get the provided URL, remove trailing slash if there is one
+            var instance = instanceInput.value.replace( /\/$/, "" ),
+                btn = document.getElementById( "activate" ),
+                socialEvent = new CustomEvent("ActivateSocialFeature"),
+                data;
 
-      // ???
-      // icons should be 32x32 pixels
-      // "markedIcon": baseurl + "/unchecked.jpg",
-      // "unmarkedIcon": baseurl + "/checked.jpg",
+            // Prepend "http://" if the URL provided doesn't start with http(s)://
+            // we could use type=url on the input to get Firefox to do validation for us
+            // but it's so much nicer not having to type it...
+            if ( !/^https?:\/\//.test( instance ) ) {
+                instance = "http://" + instance;
+            }
 
-      // should be available for display purposes
-      "description": "Share web pages on GNU social",
-      "author": "chimo",
-      "homepageURL": "https://code.chromic.org/chimo/ff-gs-share",
+            data = {
+              "name": "Share on GNU social (" + instance + ")",
 
-      // optional
-      "version": "1.0"
-    }
+              // the URL of the contents for the share panel
+              "shareURL": instance + "/notice/new?status_textarea=%{title}",
 
-    function activate(node) {
-      var event = new CustomEvent("ActivateSocialFeature");
-      node.setAttribute("data-service", JSON.stringify(data));
-      node.dispatchEvent(event);
-    }
+              // should be available for display purposes
+              "description": "Share web pages on GNU social (" + instance + ")",
+              "author": "chimo",
+              "homepageURL": "https://code.chromic.org/chimo/ff-gs-share/src/unhosted",
+
+              // optional
+              "version": "1.0",
+
+              "iconURL": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAACqAAAAqgEGCnBPAAAAB3RJTUUH4AkNDhg7HGRX+QAAAjpJREFUOMutU09I02EYft7v9/02t1gpbiKJS7efoYKllnbuZKcgggjCiYGxS6M/dBCkQ6duDU/lktoqJOalDsUqCq8GrRhq6GYjpItjU0j6Of19bwfd2vLiwff0fs/3vs/3vM/3fcBBxbhhgBvj5XXM30OlPGr0lnNujGPcMMp1VEkS8XcdrYGWYNCrQCY5VrkXM3rvEasLJqyBkUzqVwmXE219uLb0GQBgJxkm5jeDmeTY467OQ7YN/SIA1Lq1+PnZL3ef+3scdpJhAJcAYKKtb0fBM193EIBXEdUROMCEDDF1EXhHNghMnALDD1BMgAtg/Bxc/vpQAoCS2luhVESA3QzMEKMehBVmbO0OKgXTFhPPEPgMQDlLiEcAQNH2fgx9n/03q+/kbXtdbcjhcfP6clYBwBFfi/izmiMzvxYe+vHtQdnc9v5qE2O+E53S6Xw/8PJpvWbX7QuTL7YhgI7hK9Iyi8XE5au5bfP32UA6tVjqEVV3SfK4dDjgam7SF6em4WptpsPHvLQ4NQ2Xt0lKRw0xi9bKliqCeefqazNfsD4Gb246PQ3WfCSm5iJR5fQ0WJ+CtzbNfMFaV3Mfqs6sfEihdBoxo/s+LDXC25ZL2HQGAFXcAnS5QSQmA5nknSctLRjOZqsVhNLpEhCF0ArCppfJhU0XRGIN4CiAcvNeDwCcWqEFgBOKoO0qJAY0kHrXIKy5/+v3EHSYSShh3SCmUQabTLTJRKOapl0/t5TifX2sqHF6X9iBxF9gaNPf2ZfsCQAAAABJRU5ErkJggg==",
+              "icon32URL": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAKoAAACqAHt73aBAAAAB3RJTUUH4AkNDhoUhYMIIgAABNZJREFUWMPtl3to1WUYxz/P7+yczbmdXUpJ3ZzuzLwlOwsiJDFSsnIWhdI/tmNaYckItBuB/6UggRYYhGTmzqa2UmJdRP+wRKOI2HbELtOdc3TonM7U3dw8t/fpj/1W83J2jo2gwAcOHN73eZ/v97m+7w/uyH9ZdpV5b1rTEfQ1TRvDJWOkzeVLhNqvvM8q+pYgF1BdL+FjTTs8s1gV+u063e1T5yCnjlPnKb9fkQ3APcCmugl8RjA5hoxEoNbj3QysVngK4ReQuRHTe+ClcDByK/0PS2a5sh2uJ8TiR1HmAA3AtqpQ4LVkGFayDb+nogBYqtDoCwW+VaxOX7C5IT5pfDTZmScfmR1bEQ40GENnVShwCGgCltaUlRfcdgos1KngEHADrAg2AfDK0R+0ttS7RIUXgJDtxBSBj4t2fv4NwPPhwJAZN+AQFWfKFNSUeseK8CCiEVQuIvSK8gXwALBLhK0G7kVZLzADiAMO+3gCyFBoEeUdLA2iUg0sB3428LTtyDggE+QnX6j56nUREKEI2IaKA4igXFI4J0InSpUqVTJY6HEgekPhKxAV8CDUoSK2e+dV6RDYC9w1CE4CtBI4eWMKgsBhYKHt2XhgoipBgTqFeQL3DYuaUaRrEEfzh9VTVOF34DuUuUC5TXpIDjsGU3dzF/ineV0YltmhywHagZjNHqBsGJAmSacCYRv0MuAEJgF9CHUOYd/y1kD01kWoRH2hwG5g99DSJzNmW46YswGYrqqqCWPEEhHr+gZSY1SNqjgsEREPcDIat1a+2NZkbnAyeRv6goG/FcsqAHDEnJuBGSYeN3mlU5zedWsKixfMd8d6+3IFcgVyY719uUULH3ZXrF1TmFc6xWXicQNMd2WYd4fbAvC1BtIfRP6yinJUD6ox3UUL5mcv2L61aGiv7euD+v3at+MA897flFFSuegvW4dWVbe3Hz7aJ5aVj8hCX7D519seRINx1ZeB3mhPr3lo88aJAK179tEdDFFSuUjcnqm4y0opqVwk3a0hWvfsBWDelo0Toj29CvSiunokCCvFfTQJMI6sTMnMc1ux/gGa39tKi/9TECGrsICsgnwBaKn9lOYtHxDv7yczP89yZGYKYICSf3wZAeeBmSYWi/ecajPuqSXW4/U1ZBbkY6Ix+jsvIqAmGsO7rpqZK58jIzubnvBpY+Jxtdu5YzQR2AVkuXJy5Ej1G139HRfInVyM5XRyoq4+0RM+rd3h03qirj5hOZ3kTi6mv+M8R159s8uVM1bswVM/EoCkehP4Pd5GIBdVV1ZhwcQx4+4mdrWfvjNndagV1RhyiovEOXYMAxcvce3ylXOIRICoLxSYM5oUICIfqerriMQjV7oSkStdFsDwOSCWxdX2c0ODySCSsMO/I5X9VClA0f1An11QiTQeUgn7NwB8OWoCJDgDnABUIZIGgZg9jkPgaBs1Ad+pgCKywb7bB1LUjagwAOSIssUXaoyPmoC/rAJfsPk4sEfgWqqSQRlAOFAVDhypLfWmDJeQptR4vHkC+4FZAtlJ1AYUWlBZ4gs3/5GOXStdAitCgW7gGeCYveSwz1v2f1E4DixLF/y2CPg9XnyhQKcIjxlYrOBXaFRoUvAjLEZ41BcKnPV7vPxrstNTnvwZP63iztfc/0/+BHQD5G6nqwjNAAAAAElFTkSuQmCC",
+              "icon64URL": "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"
+            };
+
+            btn.setAttribute( "data-service", JSON.stringify( data ) );
+            btn.dispatchEvent( socialEvent );
+        } );
+    }() );
   </script>
 </body>
 </html>
