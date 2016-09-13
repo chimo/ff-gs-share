@@ -115,7 +115,33 @@
          * @param shareTarget Object The title and url of the page to share
          */
         function redirect( instance, shareTarget ) {
-            window.location = instance + "/notice/new?status_textarea=" + shareTarget.title + "%20-%20" + shareTarget.url;
+            var queryValue = "";
+
+            // Add page title if defined
+            if ( shareTarget.title !== undefined ) {
+              queryValue += shareTarget.title;
+            }
+
+            // Add the page url
+            // We check if it's defined, but technically it should always be here, I think.
+            if ( shareTarget.url !== undefined ) {
+                if ( queryValue !== "" ) {
+                  queryValue += "%20-%20";
+                }
+
+                queryValue +=  shareTarget.url;
+            }
+
+            // If we have selected text, add that too
+            if ( shareTarget.text !== undefined ) {
+                if ( queryValue !== "" ) {
+                  queryValue += "%20%3A%20%22";
+                }
+
+                queryValue += shareTarget.text + "%22";
+            }
+
+            window.location = instance + "/notice/new?status_textarea=" + queryValue;
         }
 
         /**
