@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>GNU social Share Provider</title>
-  
+
   <style>
     .activate {
       background: #0095dd;
@@ -13,17 +13,17 @@
       cursor: pointer;
       padding: 10px 30px;
     }
-    
+
     .activate:hover {
       background: #33aae4;
     }
-    
+
     .content,
     .screenshot {
       float: left;
       width: 50%;
     }
-    
+
     .screenshot {
       text-align: center;
     }
@@ -38,7 +38,7 @@
       overflow: hidden;
       padding: 30px;
     }
-    
+
     .source {
       margin: 12px 30px;
     }
@@ -83,7 +83,7 @@
             // Get the provided URL, remove trailing slash if there is one
             var instance = instanceInput.value.replace( /\/$/, "" ),
                 btn = document.getElementById( "activate" ),
-                socialEvent = new CustomEvent("ActivateSocialFeature"),
+                socialEvent = new CustomEvent( "ActivateSocialFeature" ),
                 data;
 
             // Prepend "http://" if the URL provided doesn't start with http(s)://
